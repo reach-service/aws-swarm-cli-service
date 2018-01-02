@@ -21,7 +21,12 @@ pipeline {
     stages {
         stage("scale") {
             steps {
-                //git "https://github.com/reach-service/aws-swarm-cli-service.git"
+
+                if ("${asg_name}" == "") {
+                  currentBuild.result = 'ABORTED'
+                  error('Stopping early… No asg_name passed')
+                }
+
                 script {
                     def asgDesiredCapacity = sh(
                             script: "REGION=${REGION} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
