@@ -1,36 +1,9 @@
 version: '3.2'
 services:
-  asg-name:
-    image: reach/aws-swarm-cli
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-    command: sh -c "aws autoscaling describe-auto-scaling-groups --region $REGION | jq -r '.AutoScalingGroups[] | select(.AutoScalingGroupName | if \"${RACK}\" != \"\" then match(\"swarm-${ROLE}-${STACK_NAME}-${RACK}\"; \"i\") else match(\"swarm-${ROLE}-${STACK_NAME}\"; \"i\") end).AutoScalingGroupName'"
-    networks:
-      - cluster_network
-
   asg-desired-capacity:
     image: reach/aws-swarm-cli
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     command: sh -c "aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG_NAME | jq '.AutoScalingGroups[0].DesiredCapacity'"
-    networks:
-      - cluster_network
 
   asg-update-desired-capacity:
     image: reach/aws-swarm-cli
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     command: sh -c "aws autoscaling update-auto-scaling-group --auto-scaling-group-name $ASG_NAME --desired-capacity $ASG_DESIRED_CAPACITY"
-    networks:
-      - cluster_network
-
-networks:
-  cluster_network:
-    external:
-      name: cluster_network
