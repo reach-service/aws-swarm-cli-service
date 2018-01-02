@@ -26,7 +26,7 @@ pipeline {
     stages {
         stage("scale") {
             steps {
-                git "https://github.com/reach-service/aws-swarm-cli-service.git"
+                //git "https://github.com/reach-service/aws-swarm-cli-service.git"
                 script {
                     def asgDesiredCapacity = sh(
                             script: "REGION=${region} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
