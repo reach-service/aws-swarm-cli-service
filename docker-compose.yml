@@ -2,8 +2,8 @@ version: '3.2'
 services:
   asg-desired-capacity:
     image: reach/aws-swarm-cli
-    command: sh -c "aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG_NAME | jq '.AutoScalingGroups[0].DesiredCapacity'"
+    command: sh -c "aws autoscaling describe-auto-scaling-groups --region $REGION --auto-scaling-group-names $ASG_NAME | jq '.AutoScalingGroups[0].DesiredCapacity'"
 
   asg-update-desired-capacity:
     image: reach/aws-swarm-cli
-    command: sh -c "aws autoscaling update-auto-scaling-group --auto-scaling-group-name $ASG_NAME --desired-capacity $ASG_DESIRED_CAPACITY"
+    command: sh -c "aws autoscaling update-auto-scaling-group --region $REGION --auto-scaling-group-name $ASG_NAME --desired-capacity $ASG_DESIRED_CAPACITY"
