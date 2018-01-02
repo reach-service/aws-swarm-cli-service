@@ -21,12 +21,8 @@ pipeline {
     stages {
         stage("scale") {
             steps {
+                git "https://github.com/reach-service/aws-swarm-cli-service.git"
                 script {
-                    if ("${asg_name}" == "") {
-                      currentBuild.result = 'ABORTED'
-                      error('Stopping early… No asg_name passed')
-                    }
-                    
                     def asgDesiredCapacity = sh(
                             script: "REGION=${REGION} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
                             returnStdout: true
@@ -48,7 +44,7 @@ pipeline {
                                 def services = servicesOut.split('\n')
                                 def date = new Date()
                                 for(int i = 0; i < services.size(); i++) {
-                                    def service = services[0]
+                                    def service = services[i]
                                     sh "docker service update --env-add 'RESCHEDULE_DATE=${date}' ${service}"
                                 }
                             }
