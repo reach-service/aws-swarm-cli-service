@@ -17,11 +17,6 @@ pipeline {
                 defaultValue: "",
                 description: "The ASG name"
         )
-        string(
-                name: "region",
-                defaultValue: "us-east-1",
-                description: "The AWS region"
-        )
     }
     stages {
         stage("scale") {
@@ -29,7 +24,7 @@ pipeline {
                 //git "https://github.com/reach-service/aws-swarm-cli-service.git"
                 script {
                     def asgDesiredCapacity = sh(
-                            script: "REGION=${region} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
+                            script: "REGION=${REGION} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
                             returnStdout: true
                     ).trim().toInteger()
                     def asgNewCapacity = asgDesiredCapacity + scale.toInteger()
@@ -38,22 +33,22 @@ pipeline {
                     } else if (asgNewCapacity > 3) {
                         error "The number of nodes is already at the maximum capacity of 3"
                     } else {
-                        sh "REGION=${region} ASG_NAME=${asg_name} ASG_DESIRED_CAPACITY=${asgNewCapacity} docker-compose run --rm asg-update-desired-capacity"
-                        //if (scale.toInteger() > 0) {
-                        //    sleep 300
-                        //    script {
-                        //        def servicesOut = sh(
-                        //                script: "docker service ls -q -f label=com.df.reschedule=true",
-                        //                returnStdout: true
-                        //        )
-                        //        def services = servicesOut.split('\n')
-                        //        def date = new Date()
-                        //        for(int i = 0; i < services.size(); i++) {
-                        //            def service = services[0]
-                        //            sh "docker service update --env-add 'RESCHEDULE_DATE=${date}' ${service}"
-                        //        }
-                        //    }
-                        //}
+                        sh "REGION=${REGION} ASG_NAME=${asg_name} ASG_DESIRED_CAPACITY=${asgNewCapacity} docker-compose run --rm asg-update-desired-capacity"
+                        if (scale.toInteger() > 0) {
+                            sleep 300
+                            script {
+                                def servicesOut = sh(
+                                        script: "docker service ls -q -f label=com.df.reschedule=true",
+                                        returnStdout: true
+                                )
+                                def services = servicesOut.split('\n')
+                                def date = new Date()
+                                for(int i = 0; i < services.size(); i++) {
+                                    def service = services[0]
+                                    sh "docker service update --env-add 'RESCHEDULE_DATE=${date}' ${service}"
+                                }
+                            }
+                        }
                         echo "Changed the number of ${asg_name} nodes from ${asgDesiredCapacity} to ${asgNewCapacity}"
                     }
                 }
