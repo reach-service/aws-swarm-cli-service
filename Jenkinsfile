@@ -6,11 +6,6 @@ pipeline {
     stage('scale') {
       steps {
         script {
-          if (asg_name == "") {
-            currentBuild.result = 'ABORTED'
-            error('Stopping early… No asg_name passed')
-          }
-          
           def asgDesiredCapacity = sh(
             script: "REGION=${REGION} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
             returnStdout: true
@@ -47,15 +42,15 @@ pipeline {
   post {
     success {
       slackSend(color: 'good', message: """Scaled the number of \"${asg_name}\" nodes.
-      Please check Jenkins logs for the job ${env.JOB_NAME} #${env.BUILD_NUMBER}
-      ${env.BUILD_URL}console""")
+            Please check Jenkins logs for the job ${env.JOB_NAME} #${env.BUILD_NUMBER}
+            ${env.BUILD_URL}console""")
       
     }
     
     failure {
       slackSend(color: 'danger', message: """Unable to scale the number of \"${asg_name}\" nodes.
-      Please check Jenkins logs for the job ${env.JOB_NAME} #${env.BUILD_NUMBER}
-      ${env.BUILD_URL}console""")
+            Please check Jenkins logs for the job ${env.JOB_NAME} #${env.BUILD_NUMBER}
+            ${env.BUILD_URL}console""")
       
     }
     
