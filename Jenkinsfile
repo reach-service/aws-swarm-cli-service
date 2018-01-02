@@ -21,13 +21,12 @@ pipeline {
     stages {
         stage("scale") {
             steps {
-
-                if ("${asg_name}" == "") {
-                  currentBuild.result = 'ABORTED'
-                  error('Stopping early… No asg_name passed')
-                }
-
                 script {
+                    if ("${asg_name}" == "") {
+                      currentBuild.result = 'ABORTED'
+                      error('Stopping early… No asg_name passed')
+                    }
+                    
                     def asgDesiredCapacity = sh(
                             script: "REGION=${REGION} ASG_NAME=${asg_name} docker-compose run --rm asg-desired-capacity",
                             returnStdout: true
